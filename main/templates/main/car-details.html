@@ -1,0 +1,84 @@
+{% extends 'main/home.html' %}
+{% load static %}
+{% load l10n %}
+{% block body %}
+
+  <main class="main">
+    <!-- Portfolio Details Section -->
+    <section id="portfolio-details" class="portfolio-details section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row gy-4">
+
+          <div class="col-lg-8">
+            <div class="portfolio-details-slider swiper init-swiper">
+
+              <script type="application/json" class="swiper-config">
+                {
+                  "loop": true,
+                  "speed": 600,
+                  "autoplay": {
+                    "delay": 5000
+                  },
+                  "slidesPerView": "auto",
+                  "pagination": {
+                    "el": ".swiper-pagination",
+                    "type": "bullets",
+                    "clickable": true
+                  }
+                }
+              </script>
+
+              <div class="swiper-wrapper align-items-center">
+                {% if car.images.exists %}
+                  {% for photo in car.images.all %}
+                    <div class="swiper-slide">
+                      <img src="{{ photo.image.url }}" alt="{{ car.title|default:'Car photo' }}">
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="swiper-slide">
+                    <img src="{{car.profile_img.url}}" alt="{{ car.title|default:'Car photo' }}">
+                  </div>
+                {% endif %}
+
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="portfolio-info" data-aos="fade-up" data-aos-delay="200">
+              <h3>Car Information</h3>
+              <ul>
+                <li><strong>Make</strong>: {{ car.make|default:"-" }}</li>
+                <li><strong>Model</strong>: {{ car.model|default:"-" }}</li>
+                <li><strong>Year</strong>: {{ car.year|unlocalize|default:"-" }}</li>
+                <li><strong>Mileage</strong>: {{ car.mileage|default:"-" }}</li>
+                <li><strong>Price</strong>: ${{ car.price|default:"-" }}</li>
+                <li><strong>Down Payment</strong>: ${{ car.down_payment|default:"-" }}</li>
+              </ul>
+            </div>
+
+            <div class="portfolio-description" data-aos="fade-up" data-aos-delay="300">
+              <h2> Car Description</h2>
+              {% if car.description %}
+                <p>{{ car.description }}</p>
+              {% else %}
+                <p>No description provided.</p>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Portfolio Details Section -->
+
+  </main>
+
+{% endblock %}
+
+ 
