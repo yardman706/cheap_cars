@@ -18,7 +18,7 @@ SECRET_KEY = 'django-insecure-e+q^!^q%dizcs&a%o7^fvojofcmz6-7#4l&4e9#vrkw83ol3z1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["cheapcars-production.up.railway.app", "https://cheapcars-production.up.railway.app"]
+ALLOWED_HOSTS = ["cheapcars-production.up.railway.app", "https://cheapcars-production.up.railway.app", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = ["https://cheapcars-production.up.railway.app"]
 
 
@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'whitenoise.runserver_nostatic',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +136,11 @@ UNFOLD = {
     "SITE_TITLE": "Cheap Cars",
     "SITE_HEADER": "Cheap Cars Admin"
 }
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
