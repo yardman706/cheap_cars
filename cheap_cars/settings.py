@@ -19,7 +19,7 @@ SECRET_KEY = 'django-insecure-e+q^!^q%dizcs&a%o7^fvojofcmz6-7#4l&4e9#vrkw83ol3z1
 DEBUG = False
 
 ALLOWED_HOSTS = ["cheapcars-production.up.railway.app", "https://cheapcars-production.up.railway.app", "127.0.0.1", "cheapcarsdeals.com"]
-CSRF_TRUSTED_ORIGINS = ["https://cheapcars-production.up.railway.app, "https://cheapcarsdeals.com"]
+CSRF_TRUSTED_ORIGINS = ["https://cheapcars-production.up.railway.app", "https://cheapcarsdeals.com"]
 
 
 # Application definition
