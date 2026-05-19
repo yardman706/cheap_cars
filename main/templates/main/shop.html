@@ -29,7 +29,7 @@
                                 <!-- Product name-->
                                 <h5 class="fw-bolder">{{car.year|unlocalize}} {{car.make}} {{car.model}}</h5>
                                 <!-- Product price-->
-                                Mileage: {{car.mileage}} miles <br>
+                                Mileage: {{car.mileage}} <br>
                                 Price: ${{car.price}} <br>
                                 
                             </div>
@@ -37,8 +37,7 @@
                         <!-- Product actions-->
                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                             <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'car_details' car.pk %}">Car Details </a></div>
-                            <br>
-                            <div class="text-center"><a class="btn btn-outline-success mt-auto" href="https://wa.me/17735123795"><i class="bi bi-whatsapp"></i> Check Availability </a></div>
+                            
                         </div>
                     </div>
                     
