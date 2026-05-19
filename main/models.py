@@ -16,6 +16,7 @@ class Car(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     down_payment = models.PositiveIntegerField(null=True, blank=True, default=1000)
+    financing = models.PositiveIntegerField(null=True, blank=True, default=500)
 
     class Meta:
         ordering = ["-created_at"]
