@@ -18,7 +18,7 @@ def car_details(request, pk):
     context = {"car": car}
     return render(request, "main/car-details.html", context)
 
-@login_required
+@login_required(login_url='inventory')
 def upload_car_form(request):
     if request.method == "POST":
         form = CarForm(request.POST, request.FILES)
@@ -32,7 +32,7 @@ def upload_car_form(request):
     context = {"form": CarForm()}
     return render(request, "main/post-cars.html", context)
 
-@login_required
+@login_required(login_url='inventory')
 def upload_car_images_form(request, car_id):
     car = get_object_or_404(Car, pk=car_id)
 
