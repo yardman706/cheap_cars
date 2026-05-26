@@ -17,12 +17,13 @@ class Car(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     down_payment = models.PositiveIntegerField(null=True, blank=True, default=1000)
     financing = models.PositiveIntegerField(null=True, blank=True, default=500)
+    vin_number = models.CharField(max_length=100, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return f'{self.id} - {self.make}'
+        return f'{self.id}'
 
 
 class CarImage(models.Model):
@@ -46,7 +47,7 @@ class CarImage(models.Model):
         if self.pk:
             qs = qs.exclude(pk=self.pk)
         if qs.count() >= 30:
-            raise ValidationError({"image": "Each car can have at most 10 images."})
+            raise ValidationError({"image": "Each car can have at most 30 images."})
 
     def save(self, *args, **kwargs):
         self.full_clean()

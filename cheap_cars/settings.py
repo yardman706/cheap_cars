@@ -18,8 +18,8 @@ SECRET_KEY = 'django-insecure-e+q^!^q%dizcs&a%o7^fvojofcmz6-7#4l&4e9#vrkw83ol3z1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["cheapcars-production.up.railway.app", "https://cheapcars-production.up.railway.app", "127.0.0.1", "cheapcarsdeals.com"]
-CSRF_TRUSTED_ORIGINS = ["https://cheapcars-production.up.railway.app", "https://cheapcarsdeals.com"]
+ALLOWED_HOSTS = ["https://cheapcarsdeals.com", "127.0.0.1", "cheapcarsdeals.com"]
+CSRF_TRUSTED_ORIGINS = ["https://cheapcarsdeals.com"]
 
 
 # Application definition
@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'cloudinary',
     'cloudinary_storage',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +116,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR/'static']
 
 # Whitenoise
@@ -136,3 +138,6 @@ UNFOLD = {
     "SITE_TITLE": "Cheap Cars",
     "SITE_HEADER": "Cheap Cars Admin"
 }
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

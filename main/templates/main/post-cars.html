@@ -1,0 +1,18 @@
+{% extends 'main/home.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+<section class="container min-vh-100 d-flex justify-content-center align-items-center">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h1 class="text-dark"><strong>Create Car Objects</strong></h1>
+
+        {{form|crispy}}
+
+        <button type="submit" class="btn btn-info mt-3">Upload</button>
+    </form>
+
+</section>
+{% endblock %}
