@@ -66,11 +66,11 @@
             </div>
 
             {% if user.is_authenticated %}
-            <a src="{% url 'upload_cars' %}" class="btn btn-info mt-3">Upload more images</a>
+            <a href="{% url 'upload_cars' %}" class="btn btn-info mt-3">Upload more cars</a>
             {% else %}
             <p></p>
             {% endif%}
-            
+
             <div class="portfolio-description" data-aos="fade-up" data-aos-delay="300">
               <h2> Car Description</h2>
               {% if car.description %}
