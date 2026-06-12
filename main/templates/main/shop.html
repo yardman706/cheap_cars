@@ -4,10 +4,10 @@
 
 {% block body %}
     <!-- Header-->
-    <header class="bg-primary py-5">
+    <header class="bg-dark py-5">
         <div class="container px-4 px-lg-5 my-5">
             <div class="text-center text-white">
-                <h1 class="display-4 fw-bolder">Car Listings / Inventory</h1>
+                <h1 class="display-2 fw-bolder">Our Car Inventory</h1>
                 <p class="lead fw-normal text-white mb-0">From compact city cars to spacious family vehicles, our inventory is updated regularly to bring you the best affordable options on the market. Find the car that works for you.</p>
             </div>
         </div>
@@ -16,6 +16,31 @@
     <!-- Section-->
     <section class="py-5">
         <div class="container px-4 px-lg-5 mt-5">
+            <form method="get" action="{% url 'inventory' %}" class="row g-2 justify-content-center mb-5">
+                <div class="col-lg-8">
+                    <div class="input-group input-group-lg shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ query }}"
+                            class="form-control border-start-0"
+                            placeholder="Search by make, model, year, VIN, mileage, or price..."
+                            aria-label="Search inventory"
+                        >
+                        <button type="submit" class="btn btn-info px-4">Search</button>
+                    </div>
+                </div>
+                {% if query %}
+                <div class="col-lg-8 text-center">
+                    <p class="text-muted mb-0">
+                        {{ cars|length }} result{{ cars|length|pluralize }} for “{{ query }}”
+                        <a href="{% url 'inventory' %}" class="ms-2">Clear search</a>
+                    </p>
+                </div>
+                {% endif %}
+            </form>
+
             <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
 
                 {% for car in cars %}
@@ -47,6 +72,13 @@
                     
                 </div>
 
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted fs-5 mb-3">No cars match your search.</p>
+                    {% if query %}
+                    <a href="{% url 'inventory' %}" class="btn btn-outline-dark">View all inventory</a>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
         </div>

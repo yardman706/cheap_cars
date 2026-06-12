@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -12,14 +13,42 @@ def home(request):
 
 
 def inventory(request):
+    query = request.GET.get("q", "").strip()
     cars = Car.objects.all()
-    context = {"cars": cars}
+
+    if query:
+        filters = (
+            Q(make__icontains=query)
+            | Q(model__icontains=query)
+            | Q(description__icontains=query)
+            | Q(vin_number__icontains=query)
+            | Q(condition__icontains=query)
+        )
+        if query.isdigit():
+            num = int(query)
+            filters |= Q(year=num) | Q(mileage=num) | Q(price=num)
+        cars = cars.filter(filters)
+
+    context = {"cars": cars, "query": query}
     return render(request, "main/shop.html", context)
 
 
 def car_details(request, pk):
     car = get_object_or_404(Car.objects.prefetch_related("images"), pk=pk)
-    context = {"car": car}
+    car_title = " ".join(
+        str(part) for part in [car.year, car.make, car.model] if part
+    ).strip() or f"Car #{car.pk}"
+    inquiry_message = (
+        f"Hi! I'm interested in the {car_title} listed on Cheap Cars and Trucks. "
+        f"Price: ${car.price}. "
+        f"View listing: {request.build_absolute_uri()}"
+    )
+    context = {
+        "car": car,
+        "inquiry_message": inquiry_message,
+        "contact_phone": "+17735123795",
+        "whatsapp_phone": "17735123795",
+    }
     return render(request, "main/car-details.html", context)
 
 

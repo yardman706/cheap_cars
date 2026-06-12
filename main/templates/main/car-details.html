@@ -62,7 +62,22 @@
                 <li><strong>Financing</strong>: ${{ car.financing|default:"-" }}</li>
               </ul>
 
-        
+              <div class="d-grid gap-2 mt-4">
+                <a
+                  href="https://wa.me/{{ whatsapp_phone }}?text={{ inquiry_message|urlencode }}"
+                  class="btn btn-success btn-lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <i class="bi bi-whatsapp me-2"></i>Text us on WhatsApp
+                </a>
+                <a
+                  href="sms:{{ contact_phone }}?body={{ inquiry_message|urlencode }}"
+                  class="btn btn-outline-primary btn-lg"
+                >
+                  <i class="bi bi-chat-dots me-2"></i>Send us a text (SMS)
+                </a>
+              </div>
             </div>
 
             {% if user.is_authenticated %}
