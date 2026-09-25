@@ -1,5 +1,31 @@
 from django.db import models
 
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.email
+
+
+class ContactInquiry(models.Model):
+    name = models.CharField(max_length=120)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
+
+
 class Car(models.Model):
     class ConditionChoices(models.TextChoices):
         USED = "Used", "Used"
@@ -21,6 +47,12 @@ class Car(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["-created_at"], name="car_created_at_idx"),
+            models.Index(fields=["make", "model"], name="car_make_model_idx"),
+            models.Index(fields=["vin_number"], name="car_vin_number_idx"),
+            models.Index(fields=["condition"], name="car_condition_idx"),
+        ]
 
     def __str__(self) -> str:
         return f'{self.id}'

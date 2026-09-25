@@ -1,20 +1,61 @@
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import CarForm
-from .models import Car, CarImage
+from .forms import CarForm, ContactInquiryForm, NewsletterForm
+from .models import Car, CarImage, ContactInquiry, NewsletterSubscriber
 
 
 def home(request):
-    return render(request, 'main/home.html')
+    newsletter_form = NewsletterForm()
+    contact_form = ContactInquiryForm()
+
+    if request.method == "POST" and request.POST.get("form_type") == "newsletter":
+        newsletter_form = NewsletterForm(request.POST)
+        if newsletter_form.is_valid():
+            email = newsletter_form.cleaned_data["email"]
+            subscriber, created = NewsletterSubscriber.objects.get_or_create(email=email)
+            if created:
+                messages.success(request, "Thanks for subscribing to our newsletter!")
+            else:
+                messages.info(request, "This email is already subscribed.")
+            return redirect("home")
+
+    if request.method == "POST" and request.POST.get("form_type") == "contact":
+        contact_form = ContactInquiryForm(request.POST)
+        if contact_form.is_valid():
+            contact_form.save()
+            messages.success(request, "Thanks for contacting us. We will get back to you soon.")
+            return redirect("home")
+
+    return render(
+        request,
+        "main/home.html",
+        {"newsletter_form": newsletter_form, "contact_form": contact_form},
+    )
 
 
 def inventory(request):
     query = request.GET.get("q", "").strip()
-    cars = Car.objects.all()
+    cars = (
+        Car.objects.order_by("-created_at")
+        .only(
+            "id",
+            "make",
+            "model",
+            "year",
+            "profile_img",
+            "price",
+            "mileage",
+            "condition",
+            "description",
+            "vin_number",
+            "created_at",
+        )
+    )
 
     if query:
         filters = (
@@ -29,7 +70,11 @@ def inventory(request):
             filters |= Q(year=num) | Q(mileage=num) | Q(price=num)
         cars = cars.filter(filters)
 
-    context = {"cars": cars, "query": query}
+    paginator = Paginator(cars, 12)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"cars": page_obj, "query": query, "result_count": cars.count()}
     return render(request, "main/shop.html", context)
 
 
