@@ -1,0 +1,207 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Financing | Cheap Cars and Trucks{% endblock %}
+
+{% block extra_head %}
+<style>
+    .financing-hero {
+        padding: 4.5rem 0;
+        color: #fff;
+        background: linear-gradient(115deg, #121416 0%, #25292c 68%, #3a1719 100%);
+        border-bottom: 5px solid #ed1c24;
+    }
+
+    .financing-eyebrow {
+        color: #ff6268;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .financing-hero h1 {
+        max-width: 680px;
+        margin: 0.65rem 0 1rem;
+        color: #fff;
+        font-size: clamp(2.25rem, 5vw, 3.6rem);
+        font-weight: 800;
+        line-height: 1.05;
+    }
+
+    .financing-hero p {
+        max-width: 610px;
+        margin: 0;
+        color: #e0e0e0;
+        font-size: 1.05rem;
+        line-height: 1.7;
+    }
+
+    .financing-content {
+        padding: 3.5rem 0 4.5rem;
+    }
+
+    .financing-section-title {
+        color: #17191b;
+        font-weight: 800;
+    }
+
+    .financing-steps {
+        display: grid;
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+    }
+
+    .financing-step {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .financing-step-number {
+        display: grid;
+        width: 42px;
+        aspect-ratio: 1;
+        place-items: center;
+        border: 1px solid #ed1c24;
+        border-radius: 50%;
+        color: #c9151c;
+        font-weight: 800;
+    }
+
+    .financing-step h3 {
+        margin: 0 0 0.35rem;
+        color: #17191b;
+        font-size: 1.05rem;
+        font-weight: 750;
+    }
+
+    .financing-step p,
+    .financing-disclaimer {
+        margin: 0;
+        color: #5b6268;
+        line-height: 1.6;
+    }
+
+    .financing-request {
+        padding: 1.5rem;
+        border: 1px solid #e0e2e4;
+        border-top: 4px solid #ed1c24;
+        background: #fff;
+        box-shadow: 0 12px 32px rgba(17, 21, 24, 0.07);
+    }
+
+    .financing-request h2 {
+        margin-bottom: 0.35rem;
+        color: #17191b;
+        font-size: 1.45rem;
+        font-weight: 800;
+    }
+
+    .financing-request-intro {
+        margin-bottom: 1.25rem;
+        color: #5b6268;
+    }
+
+    @media (max-width: 767.98px) {
+        .financing-hero {
+            padding: 3rem 0;
+        }
+
+        .financing-content {
+            padding: 2.5rem 0 3rem;
+        }
+
+        .financing-request {
+            padding: 1.15rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<main>
+    <section class="financing-hero">
+        <div class="container">
+            <span class="financing-eyebrow">Financing options</span>
+            <h1>Let's find a way forward.</h1>
+            <p>Tell us what you're looking for and our team can walk you through available vehicle financing options, estimated payments, and next steps.</p>
+        </div>
+    </section>
+
+    <section class="financing-content">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-6">
+                    <h2 class="financing-section-title">A straightforward process</h2>
+                    <div class="financing-steps">
+                        <div class="financing-step">
+                            <span class="financing-step-number">1</span>
+                            <div>
+                                <h3>Choose a vehicle</h3>
+                                <p>Browse our current inventory and let us know which vehicles caught your eye.</p>
+                            </div>
+                        </div>
+                        <div class="financing-step">
+                            <span class="financing-step-number">2</span>
+                            <div>
+                                <h3>Talk through your options</h3>
+                                <p>Our team will contact you to discuss your budget, down payment, and possible payment plans.</p>
+                            </div>
+                        </div>
+                        <div class="financing-step">
+                            <span class="financing-step-number">3</span>
+                            <div>
+                                <h3>Review the details</h3>
+                                <p>Before making a decision, review the terms, costs, and any lender requirements with our team.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="financing-disclaimer mt-4">Submitting this request does not guarantee approval or a specific rate. Final terms depend on the lender and your application. Please do not include Social Security, bank account, or payment card details in this form.</p>
+                    <a class="btn btn-outline-dark mt-4" href="{% url 'inventory' %}">Browse vehicles <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
+                </div>
+
+                <div class="col-lg-6" id="request-financing">
+                    <div class="financing-request">
+                        <h2>Request a financing conversation</h2>
+                        <p class="financing-request-intro">Share a few details and we'll get back to you.</p>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-success" role="status">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post" action="{% url 'financing' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="financing">
+                            {{ form.non_field_errors }}
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
+                                {{ form.name }}
+                                {{ form.name.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                                {{ form.subject }}
+                                {{ form.subject.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ form.message.id_for_label }}">What would you like us to know?</label>
+                                {{ form.message }}
+                                {{ form.message.errors }}
+                            </div>
+                            <button class="btn btn-danger fw-bold px-4 py-2" type="submit">Send financing request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

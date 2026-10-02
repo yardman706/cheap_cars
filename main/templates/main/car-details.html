@@ -1,109 +1,493 @@
 {% extends 'main/home.html' %}
 {% load static %}
 {% load l10n %}
+{% block title %}{% if car.year %}{{ car.year|unlocalize }} {% endif %}{{ car.make }} {{ car.model }} | Cheap Cars and Trucks{% endblock %}
+{% block extra_head %}
+  {{ block.super }}
+  <style>
+    .vehicle-page {
+      --vehicle-red: #ed1c24;
+      --vehicle-red-dark: #c9151c;
+      --vehicle-ink: #17191b;
+      --vehicle-muted: #626a70;
+      padding-bottom: 3.5rem;
+      background: #f4f5f6;
+    }
+
+    .vehicle-heading {
+      padding: 1.5rem 0 1.25rem;
+      border-bottom: 1px solid #e1e3e5;
+      background: #fff;
+    }
+
+    .car-detail-breadcrumb {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      color: #7a8186;
+      font-size: 0.82rem;
+    }
+
+    .car-detail-breadcrumb a {
+      color: #42494e;
+      text-decoration: none;
+    }
+
+    .car-detail-breadcrumb a:hover { color: var(--vehicle-red-dark); }
+
+    .vehicle-heading-row {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .car-detail-title {
+      margin: 0;
+      color: var(--vehicle-ink);
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 800;
+      line-height: 1.12;
+    }
+
+    .vehicle-condition {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.35rem;
+      color: #4d555a;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .vehicle-condition::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--vehicle-red);
+      content: "";
+    }
+
+    .vehicle-layout { padding-top: 1.5rem; }
+
+    .car-gallery-stage {
+      position: relative;
+      display: flex;
+      overflow: hidden;
+      min-height: 360px;
+      aspect-ratio: 16 / 10;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e1e3e5;
+      background: #f1f2f3;
+      touch-action: pan-y;
+    }
+
+    .car-gallery-slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .car-gallery-slide.is-active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: car-gallery-reveal 280ms ease both;
+    }
+
+    .car-gallery-slide img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-height: min(72vh, 680px);
+      object-fit: contain;
+    }
+
+    .car-gallery-empty {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      min-height: inherit;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: #c6c9cb;
+      font-size: 0.95rem;
+    }
+
+    .car-gallery-empty i { color: var(--vehicle-red); font-size: 2.5rem; }
+
+    .car-gallery-control {
+      position: absolute;
+      z-index: 1;
+      top: 50%;
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      transform: translateY(-50%);
+      border: 1px solid rgba(255, 255, 255, 0.48);
+      border-radius: 50%;
+      background: rgba(15, 17, 18, 0.76);
+      color: #fff;
+      font-size: 1.2rem;
+      transition: background-color 160ms ease, border-color 160ms ease;
+    }
+
+    .car-gallery-control:hover,
+    .car-gallery-control:focus-visible {
+      border-color: var(--vehicle-red);
+      background: var(--vehicle-red);
+    }
+
+    .car-gallery-previous { left: 16px; }
+    .car-gallery-next { right: 16px; }
+
+    .car-gallery-count {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 17, 18, 0.82);
+      color: #fff;
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .car-gallery-thumbnails {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding: 10px 1px 3px;
+      scrollbar-width: thin;
+    }
+
+    .car-gallery-thumbnail {
+      flex: 0 0 92px;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      padding: 0;
+      border: 2px solid transparent;
+      background: #17191b;
+      opacity: 0.68;
+      transition: border-color 160ms ease, opacity 160ms ease;
+    }
+
+    .car-gallery-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+
+    .car-gallery-thumbnail:hover,
+    .car-gallery-thumbnail.is-active { border-color: var(--vehicle-red); opacity: 1; }
+
+    .car-gallery-thumbnail:focus-visible,
+    .car-gallery-control:focus-visible {
+      outline: 3px solid var(--vehicle-red);
+      outline-offset: 3px;
+    }
+
+    .vehicle-summary {
+      position: sticky;
+      top: 1rem;
+      overflow: hidden;
+      border: 1px solid #dfe1e3;
+      border-top: 4px solid var(--vehicle-red);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(17, 21, 24, 0.07);
+    }
+
+    .vehicle-price-block { padding: 1.25rem 1.25rem 1rem; }
+
+    .vehicle-price-label {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--vehicle-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .vehicle-price {
+      color: var(--vehicle-ink);
+      font-size: 2rem;
+      font-weight: 850;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vehicle-spec-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-top: 1px solid #e5e7e8;
+      border-bottom: 1px solid #e5e7e8;
+    }
+
+    .vehicle-spec {
+      min-width: 0;
+      padding: 0.85rem 1rem;
+    }
+
+    .vehicle-spec:nth-child(odd) { border-right: 1px solid #e5e7e8; }
+    .vehicle-spec:nth-child(n + 3) { border-top: 1px solid #e5e7e8; }
+    .vehicle-spec-vin { grid-column: 1 / -1; border-right: 0 !important; }
+
+    .vehicle-spec-label {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: var(--vehicle-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .vehicle-spec-value {
+      display: block;
+      overflow-wrap: anywhere;
+      color: var(--vehicle-ink);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .vehicle-contact { display: grid; gap: 0.65rem; padding: 1rem 1.25rem 1.25rem; }
+
+    .vehicle-contact .btn {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      font-weight: 750;
+    }
+
+    .vehicle-contact .btn-danger { background: var(--vehicle-red); border-color: var(--vehicle-red); }
+    .vehicle-contact .btn-danger:hover { background: var(--vehicle-red-dark); border-color: var(--vehicle-red-dark); }
+
+    .vehicle-contact .btn-outline-dark:hover { background: var(--vehicle-ink); }
+
+    .vehicle-description {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid #e1e3e5;
+      border-left: 4px solid var(--vehicle-red);
+      background: #fff;
+    }
+
+    .vehicle-description h2 {
+      margin: 0 0 0.75rem;
+      color: var(--vehicle-ink);
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .vehicle-description p { margin: 0; color: #4d555a; line-height: 1.75; white-space: pre-line; }
+
+    .vehicle-admin-link { color: #525960; font-size: 0.85rem; }
+    .vehicle-admin-link:hover { color: var(--vehicle-red-dark); }
+
+    @keyframes car-gallery-reveal {
+      from { opacity: 0.65; }
+      to { opacity: 1; }
+    }
+
+    @media (max-width: 991.98px) {
+      .vehicle-summary { position: static; }
+    }
+
+    @media (max-width: 575.98px) {
+      .vehicle-page { padding-bottom: 2rem; }
+      .vehicle-heading { padding: 1.1rem 0; }
+      .vehicle-heading-row { align-items: start; flex-direction: column; gap: 0.4rem; }
+      .vehicle-condition { margin-bottom: 0; }
+      .vehicle-layout { padding-top: 1rem; }
+      .car-gallery-stage { min-height: 235px; aspect-ratio: 4 / 3; }
+      .car-gallery-control { width: 40px; height: 40px; }
+      .car-gallery-previous { left: 10px; }
+      .car-gallery-next { right: 10px; }
+      .car-gallery-thumbnail { flex-basis: 78px; }
+      .vehicle-description { margin-top: 1rem; padding: 1.15rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .car-gallery-slide.is-active { animation: none; }
+      .car-gallery-control, .car-gallery-thumbnail { transition: none; }
+    }
+  </style>
+{% endblock %}
 {% block body %}
 
-  <main class="main">
-    <!-- Portfolio Details Section -->
-    <section id="portfolio-details" class="portfolio-details section">
+  <main class="vehicle-page">
+    <header class="vehicle-heading">
+      <div class="container">
+        <nav class="car-detail-breadcrumb" aria-label="Breadcrumb">
+          <a href="{% url 'inventory' %}">Inventory</a>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          <span>Vehicle details</span>
+        </nav>
+        <div class="vehicle-heading-row">
+          <h1 class="car-detail-title">{% if car.year %}{{ car.year|unlocalize }} {% endif %}{{ car.make }} {{ car.model }}</h1>
+          {% if car.condition %}<span class="vehicle-condition">{{ car.get_condition_display }}</span>{% endif %}
+        </div>
+      </div>
+    </header>
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4">
-
-          <div class="col-lg-8">
-            <div class="portfolio-details-slider swiper init-swiper">
-
-              <script type="application/json" class="swiper-config">
-                {
-                  "loop": true,
-                  "speed": 600,
-                  "autoplay": {
-                    "delay": 5000
-                  },
-                  "slidesPerView": "auto",
-                  "pagination": {
-                    "el": ".swiper-pagination",
-                    "type": "bullets",
-                    "clickable": true
-                  }
-                }
-              </script>
-
-              <div class="swiper-wrapper align-items-center">
-                {% if car.images.exists %}
-                  {% for photo in car.images.all %}
-                    <div class="swiper-slide">
-                      <img src="{{ photo.image.url }}" alt="{{ car.title|default:'Car photo' }}">
-                    </div>
-                  {% endfor %}
-                {% else %}
-                  <div class="swiper-slide">
-                    <img src="{{car.profile_img.url}}" alt="{{ car.title|default:'Car photo' }}">
+    <section class="container vehicle-layout" aria-label="Vehicle listing">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+          <div class="car-gallery" id="car-gallery" role="region" aria-roledescription="carousel" aria-label="{{ car.title|default:'Car' }} photo gallery">
+            <div class="car-gallery-stage" tabindex="0" aria-label="Use the arrow keys to browse photos">
+              {% if car.images.exists %}
+                {% for photo in car.images.all %}
+                  <div class="car-gallery-slide{% if forloop.first %} is-active{% endif %}" data-gallery-slide aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+                    <img src="{{ photo.image.url }}" alt="{{ car.title|default:'Car photo' }} - photo {{ forloop.counter }}" {% if not forloop.first %}loading="lazy"{% endif %}>
                   </div>
-                {% endif %}
-
-              </div>
-              <div class="swiper-pagination"></div>
-            </div>
-          </div>
-
-          <div class="col-lg-4">
-            <div class="portfolio-info" data-aos="fade-up" data-aos-delay="200">
-              <h3>Car Information</h3>
-              <ul>
-                <li><strong>Make</strong>: {{ car.make|default:"-" }}</li>
-                <li><strong>Model</strong>: {{ car.model|default:"-" }}</li>
-                <li><strong>Year</strong>: {{ car.year|unlocalize|default:"-" }}</li>
-                <li><strong>Mileage</strong>: {{ car.mileage|default:"-" }}</li>
-                <li><strong>Vin Number</strong>: {{ car.vin_number|default:"-" }}</li>
-                <li><strong>Price</strong>: ${{ car.price|default:"-" }}</li>
-                <li><strong>Down Payment</strong>: ${{ car.down_payment|default:"-" }}</li>
-                <li><strong>Financing</strong>: ${{ car.financing|default:"-" }}</li>
-              </ul>
-
-              <div class="d-grid gap-2 mt-4">
-                <a
-                  href="https://wa.me/{{ whatsapp_phone }}?text={{ inquiry_message|urlencode }}"
-                  class="btn btn-success btn-lg"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i class="bi bi-whatsapp me-2"></i>Text us on WhatsApp
-                </a>
-                <a
-                  href="sms:{{ contact_phone }}?body={{ inquiry_message|urlencode }}"
-                  class="btn btn-outline-primary btn-lg"
-                >
-                  <i class="bi bi-chat-dots me-2"></i>Send us a text (SMS)
-                </a>
-              </div>
-            </div>
-
-            {% if user.is_authenticated %}
-            <a href="{% url 'upload_cars' %}" class="btn btn-info mt-3">Upload more cars</a>
-            {% else %}
-            <p></p>
-            {% endif%}
-
-            <div class="portfolio-description" data-aos="fade-up" data-aos-delay="300">
-              <h2> Car Description</h2>
-              {% if car.description %}
-                <p>{{ car.description }}</p>
+                {% endfor %}
+                {% with photo_count=car.images.count %}
+                  {% if photo_count > 1 %}
+                    <button class="car-gallery-control car-gallery-previous" type="button" aria-label="Show previous photo"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                    <button class="car-gallery-control car-gallery-next" type="button" aria-label="Show next photo"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    <span class="car-gallery-count" aria-live="polite"><span data-gallery-current>1</span> / {{ photo_count }}</span>
+                  {% endif %}
+                {% endwith %}
+              {% elif car.profile_img %}
+                <div class="car-gallery-slide is-active" data-gallery-slide aria-hidden="false">
+                  <img src="{{ car.profile_img.url }}" alt="{{ car.title|default:'Car photo' }}">
+                </div>
               {% else %}
-                <p>No description provided.</p>
+                <div class="car-gallery-empty" role="img" aria-label="No vehicle photo available">
+                  <i class="bi bi-car-front" aria-hidden="true"></i>
+                  <span>Vehicle photos coming soon</span>
+                </div>
               {% endif %}
             </div>
+
+            {% if car.images.count > 1 %}
+              <div class="car-gallery-thumbnails" aria-label="Choose a photo">
+                {% for photo in car.images.all %}
+                  <button class="car-gallery-thumbnail{% if forloop.first %} is-active{% endif %}" type="button" data-gallery-thumbnail="{{ forloop.counter0 }}" aria-label="Show photo {{ forloop.counter }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">
+                    <img src="{{ photo.image.url }}" alt="" loading="lazy">
+                  </button>
+                {% endfor %}
+              </div>
+            {% endif %}
           </div>
 
+          <section class="vehicle-description" aria-labelledby="vehicle-description-title">
+            <h2 id="vehicle-description-title">About this vehicle</h2>
+            {% if car.description %}
+              <p>{{ car.description }}</p>
+            {% else %}
+              <p>Contact our team for more information about this vehicle.</p>
+            {% endif %}
+          </section>
         </div>
 
+        <aside class="col-lg-4" aria-label="Vehicle information and contact">
+          <div class="vehicle-summary">
+            <div class="vehicle-price-block">
+              <span class="vehicle-price-label">Asking price</span>
+              <div class="vehicle-price">{% if car.price %}${{ car.price|localize }}{% else %}Contact for price{% endif %}</div>
+            </div>
+            <div class="vehicle-spec-grid">
+              <div class="vehicle-spec">
+                <span class="vehicle-spec-label">Year</span>
+                <span class="vehicle-spec-value">{{ car.year|unlocalize|default:"-" }}</span>
+              </div>
+              <div class="vehicle-spec">
+                <span class="vehicle-spec-label">Mileage</span>
+                <span class="vehicle-spec-value">{% if car.mileage %}{{ car.mileage|localize }} mi{% else %}-{% endif %}</span>
+              </div>
+              <div class="vehicle-spec">
+                <span class="vehicle-spec-label">Down payment</span>
+                <span class="vehicle-spec-value">{% if car.down_payment %}${{ car.down_payment|localize }}{% else %}-{% endif %}</span>
+              </div>
+              <div class="vehicle-spec">
+                <span class="vehicle-spec-label">Financing</span>
+                <span class="vehicle-spec-value">{% if car.financing %}${{ car.financing|localize }}{% else %}Ask us{% endif %}</span>
+              </div>
+              {% if car.vin_number %}
+                <div class="vehicle-spec vehicle-spec-vin">
+                  <span class="vehicle-spec-label">VIN</span>
+                  <span class="vehicle-spec-value">{{ car.vin_number }}</span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="vehicle-contact">
+              <a href="https://wa.me/{{ whatsapp_phone }}?text={{ inquiry_message|urlencode }}" class="btn btn-danger" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-whatsapp me-2" aria-hidden="true"></i>Ask about this vehicle
+              </a>
+              <a href="sms:{{ contact_phone }}?body={{ inquiry_message|urlencode }}" class="btn btn-outline-dark">
+                <i class="bi bi-chat-dots me-2" aria-hidden="true"></i>Send a text message
+              </a>
+              <a href="{% url 'financing' %}" class="btn btn-link text-dark text-decoration-none">
+                Explore financing <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+          {% if user.is_authenticated %}
+            <a href="{% url 'upload_cars' %}" class="vehicle-admin-link d-inline-block mt-3">Manage inventory</a>
+          {% endif %}
+        </aside>
       </div>
-
-    </section><!-- /Portfolio Details Section -->
-
+    </section>
   </main>
 
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    (() => {
+      const gallery = document.getElementById('car-gallery');
+      if (!gallery) return;
+
+      const stage = gallery.querySelector('.car-gallery-stage');
+      const slides = Array.from(gallery.querySelectorAll('[data-gallery-slide]'));
+      const thumbnails = Array.from(gallery.querySelectorAll('[data-gallery-thumbnail]'));
+      const currentCount = gallery.querySelector('[data-gallery-current]');
+      let activeIndex = 0;
+      let pointerStart = null;
+
+      const showSlide = (index) => {
+        activeIndex = (index + slides.length) % slides.length;
+        slides.forEach((slide, slideIndex) => {
+          const isActive = slideIndex === activeIndex;
+          slide.classList.toggle('is-active', isActive);
+          slide.setAttribute('aria-hidden', String(!isActive));
+        });
+        thumbnails.forEach((thumbnail, thumbnailIndex) => {
+          const isActive = thumbnailIndex === activeIndex;
+          thumbnail.classList.toggle('is-active', isActive);
+          thumbnail.setAttribute('aria-pressed', String(isActive));
+        });
+        if (currentCount) currentCount.textContent = String(activeIndex + 1);
+      };
+
+      gallery.querySelector('.car-gallery-previous')?.addEventListener('click', () => showSlide(activeIndex - 1));
+      gallery.querySelector('.car-gallery-next')?.addEventListener('click', () => showSlide(activeIndex + 1));
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.addEventListener('click', () => showSlide(Number(thumbnail.dataset.galleryThumbnail)));
+      });
+      stage.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft') showSlide(activeIndex - 1);
+        if (event.key === 'ArrowRight') showSlide(activeIndex + 1);
+      });
+      stage.addEventListener('pointerdown', (event) => {
+        if (event.target.closest('button')) return;
+        pointerStart = { x: event.clientX, y: event.clientY };
+      });
+      stage.addEventListener('pointerup', (event) => {
+        if (!pointerStart) return;
+        const deltaX = event.clientX - pointerStart.x;
+        const deltaY = event.clientY - pointerStart.y;
+        if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY)) {
+          showSlide(activeIndex + (deltaX < 0 ? 1 : -1));
+        }
+        pointerStart = null;
+      });
+      stage.addEventListener('pointercancel', () => { pointerStart = null; });
+    })();
+  </script>
 {% endblock %}
 
  

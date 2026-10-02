@@ -28,11 +28,9 @@
         @keyframes pageFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
@@ -49,8 +47,8 @@
         }
 
         .nav-search-toggle {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,0.35);
             background: rgba(255,255,255,0.06);
@@ -96,19 +94,86 @@
             font-weight: 700;
         }
 
+        .site-navbar .navbar-brand {
+            order: 1;
+            flex-shrink: 0;
+            margin-right: 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .site-navbar .navbar-collapse {
+            order: 2;
+            flex-grow: 0;
+        }
+
+        .site-navbar .navbar-nav {
+            gap: 0.25rem;
+        }
+
+        .site-navbar .nav-link {
+            padding: 0.65rem 0.75rem;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .site-navbar .nav-link:hover,
+        .site-navbar .nav-link:focus-visible {
+            color: #fff;
+        }
+
+        .site-navbar .navbar-actions {
+            order: 3;
+            margin-left: auto;
+            padding-left: 1.25rem;
+        }
+
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (min-width: 992px) {
+            .site-navbar .navbar-actions .btn {
+                padding: 0.7rem 1rem !important;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+        }
+
         @media (max-width: 991px) {
-            .navbar .container {
+            body {
+                padding-bottom: calc(76px + env(safe-area-inset-bottom));
+            }
+
+            .site-navbar .container {
                 position: relative;
             }
 
-            .navbar .d-flex.align-items-center.gap-3 {
+            .site-navbar .navbar-actions {
+                order: 2;
                 margin-left: auto;
+                padding-left: 0;
             }
 
             .nav-search-toggle {
-                width: 46px;
-                height: 46px;
-                margin-right: 0.25rem;
+                margin-right: 0.5rem;
+            }
+
+            .site-navbar .navbar-collapse {
+                order: 3;
+                flex-basis: 100%;
+            }
+
+            .site-navbar .navbar-nav {
+                gap: 0;
+                padding-top: 0.5rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .site-navbar .nav-link {
+                padding: 0.7rem 0;
             }
 
             .nav-search-form {
@@ -118,46 +183,118 @@
             .nav-search-form .btn {
                 width: 100%;
             }
+
+            .mobile-bottom-nav {
+                position: fixed;
+                z-index: 1030;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+                border-top: 4px solid var(--brand-red);
+                background: #fff;
+                box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.12);
+            }
+
+            .mobile-bottom-nav a,
+            .mobile-bottom-nav button {
+                display: flex;
+                min-width: 0;
+                min-height: 56px;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                padding: 2px;
+                border: 0;
+                background: transparent;
+                color: #17191b;
+                font: inherit;
+                text-decoration: none;
+            }
+
+            .mobile-bottom-nav i {
+                font-size: 23px;
+                line-height: 1;
+            }
+
+            .mobile-bottom-nav span {
+                overflow: hidden;
+                max-width: 100%;
+                font-size: 12px;
+                line-height: 1.2;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .mobile-bottom-nav a:focus-visible,
+            .mobile-bottom-nav button:focus-visible {
+                outline: 2px solid var(--brand-red);
+                outline-offset: -2px;
+            }
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top site-navbar">
     <div class="container">
         <a class="navbar-brand" href="{% url 'home' %}">
             <span class="text-white">CHEAP CARS</span>
             <span class="text-danger">&nbsp;AND TRUCKS</span>
         </a>
 
-        <div class="d-flex align-items-center gap-2 ms-auto">
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-lg-2">
+                <li class="nav-item"><a class="nav-link" href="{% url 'inventory' %}">INVENTORY</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'financing' %}">FINANCING</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">MORE</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'home' %}#services">Services</a></li>
+                        <li><a class="dropdown-item" href="{% url 'home' %}#about">About us</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#contact">CONTACT</a></li>
+            </ul>
+        </div>
+
+        <div class="navbar-actions d-flex align-items-center gap-2">
             <button type="button" class="nav-search-toggle" aria-label="Open search" title="Search inventory">
                 <i class="bi bi-search"></i>
             </button>
-            <div class="text-white d-none d-xl-block">
-                <i class="bi bi-telephone"></i>
-                +1 (773) 512-3795
-            </div>
-            <a href="{% url 'inventory' %}" class="btn btn-danger fw-bold px-4 py-3 d-none d-lg-inline-block">BOOK A TEST DRIVE</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
 
-        <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link active" href="{% url 'home' %}">HOME</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'inventory' %}">INVENTORY</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'inventory' %}">FINANCING</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#services">SERVICES</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#about">ABOUT US</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#contact">CONTACT</a></li>
-            </ul>
-
-            <a href="{% url 'inventory' %}" class="btn btn-danger fw-bold px-4 py-3 d-lg-none mt-3 w-100">BOOK A TEST DRIVE</a>
-        </div>
     </div>
+</nav>
+
+<nav class="mobile-bottom-nav" aria-label="Quick navigation">
+    <a href="{% url 'home' %}">
+        <i class="bi bi-house-fill" aria-hidden="true"></i>
+        <span>Home</span>
+    </a>
+    <a href="{% url 'inventory' %}">
+        <i class="bi bi-car-front-fill" aria-hidden="true"></i>
+        <span>Vehicles</span>
+    </a>
+    <button type="button" class="mobile-search-toggle" aria-label="Search inventory">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <span>Search</span>
+    </button>
+    <a href="{% url 'financing' %}">
+        <i class="bi bi-currency-dollar" aria-hidden="true"></i>
+        <span>Finance</span>
+    </a>
+    <a href="tel:+17735123795">
+        <i class="bi bi-phone" aria-hidden="true"></i>
+        <span>Call</span>
+    </a>
 </nav>
 
 <div class="nav-search-panel" id="navSearchPanel">
@@ -194,18 +331,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const toggleBtn = document.querySelector('.nav-search-toggle');
+        const toggleButtons = document.querySelectorAll('.nav-search-toggle, .mobile-search-toggle');
         const searchPanel = document.getElementById('navSearchPanel');
         const searchInput = searchPanel ? searchPanel.querySelector('input') : null;
 
-        if (!toggleBtn || !searchPanel || !searchInput) return;
+        if (!toggleButtons.length || !searchPanel || !searchInput) return;
 
-        toggleBtn.addEventListener('click', function () {
-            const isOpen = searchPanel.classList.contains('open');
-            searchPanel.classList.toggle('open');
-            if (!isOpen) {
-                setTimeout(() => searchInput.focus(), 80);
-            }
+        toggleButtons.forEach(function (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                const isOpen = searchPanel.classList.contains('open');
+                searchPanel.classList.toggle('open');
+                if (!isOpen) {
+                    setTimeout(() => searchInput.focus(), 80);
+                }
+            });
         });
 
         const revealItems = document.querySelectorAll('.reveal');

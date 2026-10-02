@@ -38,6 +38,24 @@ def home(request):
     )
 
 
+def financing(request):
+    if request.method == "POST" and request.POST.get("form_type") == "financing":
+        form = ContactInquiryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Thanks for your financing inquiry. Our team will be in touch soon.")
+            return redirect("financing")
+    else:
+        form = ContactInquiryForm(
+            initial={
+                "subject": "Financing inquiry",
+                "message": "I would like to learn more about financing options.",
+            }
+        )
+
+    return render(request, "main/financing.html", {"form": form})
+
+
 def inventory(request):
     query = request.GET.get("q", "").strip()
     cars = (
